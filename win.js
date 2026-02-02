@@ -4,9 +4,7 @@
 // 1) drawWin() → what the win screen looks like
 // 2) input handlers → how the player returns to the start screen
 //
-// This file is intentionally very similar to lose.js.
-// The goal is to show that win/lose screens are often
-// simple “end states” with minimal logic.
+// This screen represents winning by SURVIVING the bullets.
 
 // ------------------------------------------------------------
 // Main draw function for win screen
@@ -14,7 +12,7 @@
 // drawWin() is called from main.js
 // only when currentScreen === "win"
 function drawWin() {
-  // Green-tinted background to communicate success
+  // Green-tinted background to communicate survival/success
   background(200, 255, 200);
 
   fill(0);
@@ -22,11 +20,15 @@ function drawWin() {
 
   // Main success message
   textSize(40);
-  text("You Win!", width / 2, 300);
+  text("You Survived.", width / 2, 260);
+
+  // Subtext clarifying win condition
+  textSize(22);
+  text("You dodged the bullets and made it out alive.", width / 2, 320);
 
   // Instruction text
-  textSize(20);
-  text("Click or press R to return to Start.", width / 2, 360);
+  textSize(18);
+  text("Click or press R to return to Start.", width / 2, 380);
 }
 
 // ------------------------------------------------------------

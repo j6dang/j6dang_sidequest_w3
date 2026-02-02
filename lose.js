@@ -3,6 +3,8 @@
 // This file only defines:
 // 1) drawLose() → what the lose screen looks like
 // 2) input handlers → how the player returns to the start screen
+//
+// This screen represents LOSING by getting hit before time runs out.
 
 // ------------------------------
 // Main draw function for lose screen
@@ -10,26 +12,29 @@
 // drawLose() is called from main.js
 // only when currentScreen === "lose"
 function drawLose() {
-  // Red-tinted background to communicate failure
-  background(255, 210, 210);
+  // Dark red / danger background
+  background(120, 20, 20);
 
-  fill(0);
+  fill(255);
   textAlign(CENTER, CENTER);
 
-  // Main message
+  // Main failure message
   textSize(40);
-  text("You Lose!", width / 2, 300);
+  text("You Were Hit.", width / 2, 260);
+
+  // Subtext explaining the loss condition
+  textSize(22);
+  text("You failed to dodge the bullets in time.", width / 2, 320);
 
   // Instruction text
-  textSize(20);
-  text("Click or press R to return to Start.", width / 2, 360);
+  textSize(18);
+  text("Click or press R to try again.", width / 2, 380);
 }
 
 // ------------------------------
 // Mouse input for lose screen
 // ------------------------------
 // Any mouse click returns the player to the start screen
-// (no buttons needed for this simple end state)
 function loseMousePressed() {
   currentScreen = "start";
 }

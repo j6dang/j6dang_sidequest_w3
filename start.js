@@ -11,32 +11,44 @@
 // drawStart() is called from main.js only when:
 // currentScreen === "start"
 function drawStart() {
-  // Background colour for the start screen
-  background(180, 225, 220); // soft teal background
+  // Dark, tense backdrop
+  background(18, 20, 26);
+
+  // Subtle scanlines (texture)
+  noStroke();
+  for (let y = 0; y < height; y += 6) {
+    fill(255, 255, 255, 6);
+    rect(0, y, width, 2);
+  }
 
   // ---- Title text ----
-  fill(30, 50, 60);
-  textSize(46);
+  fill(245);
+  textSize(54);
   textAlign(CENTER, CENTER);
-  text("Win or Lose", width / 2, 180);
+  text("DODGE PROTOCOL", width / 2, 120);
+
+  // ---- Subtitle ----
+  fill(180);
+  textSize(18);
+  text("Survive the bullets. Shape the story.", width / 2, 165);
+
+  // ---- Decorative preview panel (mini arena + bullets) ----
+  drawPreviewPanel(width / 2, 310, 520, 240);
 
   // ---- Buttons (data only) ----
-  // These objects store the position/size/label for each button.
-  // Using objects makes it easy to pass them into drawButton()
-  // and also reuse the same information for hover checks.
   const startBtn = {
     x: width / 2,
-    y: 320,
-    w: 240,
-    h: 80,
-    label: "START",
+    y: 500,
+    w: 260,
+    h: 70,
+    label: "START RUN",
   };
 
   const instrBtn = {
     x: width / 2,
-    y: 430,
-    w: 240,
-    h: 80,
+    y: 585,
+    w: 260,
+    h: 70,
     label: "INSTRUCTIONS",
   };
 
@@ -45,10 +57,13 @@ function drawStart() {
   drawButton(instrBtn);
 
   // ---- Cursor feedback ----
-  // If the mouse is over either button, show a hand cursor
-  // so the player knows it is clickable.
   const over = isHover(startBtn) || isHover(instrBtn);
   cursor(over ? HAND : ARROW);
+
+  // ---- Footer hints ----
+  fill(140);
+  textSize(14);
+  text("ENTER = start   |   I = instructions", width / 2, height - 24);
 }
 
 // ------------------------------------------------------------
@@ -56,16 +71,14 @@ function drawStart() {
 // ------------------------------------------------------------
 // Called from main.js only when currentScreen === "start"
 function startMousePressed() {
-  // For input checks, we only need x,y,w,h (label is optional)
-  const startBtn = { x: width / 2, y: 320, w: 240, h: 80 };
-  const instrBtn = { x: width / 2, y: 430, w: 240, h: 80 };
+  const startBtn = { x: width / 2, y: 500, w: 260, h: 70 };
+  const instrBtn = { x: width / 2, y: 585, w: 260, h: 70 };
 
-  // If START is clicked, go to the game screen
   if (isHover(startBtn)) {
+    // Optional reset hook if your main.js defines it
+    if (typeof resetRun === "function") resetRun();
     currentScreen = "game";
-  }
-  // If INSTRUCTIONS is clicked, go to the instructions screen
-  else if (isHover(instrBtn)) {
+  } else if (isHover(instrBtn)) {
     currentScreen = "instr";
   }
 }
@@ -78,6 +91,7 @@ function startMousePressed() {
 // - I opens instructions
 function startKeyPressed() {
   if (keyCode === ENTER) {
+    if (typeof resetRun === "function") resetRun();
     currentScreen = "game";
   }
 
@@ -89,49 +103,109 @@ function startKeyPressed() {
 // ------------------------------------------------------------
 // Helper: drawButton()
 // ------------------------------------------------------------
-// This function draws a button and changes its appearance on hover.
-// It does NOT decide what happens when you click the button.
-// That logic lives in startMousePressed() above.
-//
-// Keeping drawing separate from input/logic makes code easier to read.
 function drawButton({ x, y, w, h, label }) {
   rectMode(CENTER);
 
-  // Check if the mouse is over the button rectangle
   const hover = isHover({ x, y, w, h });
 
   noStroke();
 
-  // ---- Visual feedback (hover vs not hover) ----
-  // This is a common UI idea:
-  // - normal state is calmer
-  // - hover state is brighter + more “active”
-  //
-  // We also add a shadow using drawingContext (p5 lets you access the
-  // underlying canvas context for effects like shadows).
   if (hover) {
-    fill(255, 200, 150, 220); // warm coral on hover
-
-    // Shadow settings (only when hovered)
-    drawingContext.shadowBlur = 20;
-    drawingContext.shadowColor = color(255, 180, 120);
+    fill(235, 90, 75);
+    drawingContext.shadowBlur = 18;
+    drawingContext.shadowColor = color(235, 90, 75, 120);
   } else {
-    fill(255, 240, 210, 210); // soft cream base
-
-    // Softer shadow when not hovered
-    drawingContext.shadowBlur = 8;
-    drawingContext.shadowColor = color(220, 220, 220);
+    fill(60, 70, 85);
+    drawingContext.shadowBlur = 10;
+    drawingContext.shadowColor = color(0, 0, 0, 90);
   }
 
-  // Draw the rounded rectangle button
   rect(x, y, w, h, 14);
 
-  // Important: reset shadow so it does not affect other drawings
   drawingContext.shadowBlur = 0;
 
-  // Draw the label text on top of the button
-  fill(40, 60, 70);
-  textSize(28);
+  fill(245);
+  textSize(22);
   textAlign(CENTER, CENTER);
   text(label, x, y);
+}
+
+// ------------------------------------------------------------
+// Helper: preview panel (start screen only)
+// ------------------------------------------------------------
+function drawPreviewPanel(cx, cy, w, h) {
+  const x = cx - w / 2;
+  const y = cy - h / 2;
+
+  rectMode(CORNER);
+  noStroke();
+
+  // Panel
+  fill(255, 255, 255, 10);
+  rect(x, y, w, h, 18);
+
+  // Inner frame
+  stroke(255, 255, 255, 18);
+  strokeWeight(2);
+  noFill();
+  rect(x + 10, y + 10, w - 20, h - 20, 14);
+  noStroke();
+
+  // “Arena” region
+  const ax = x + 26;
+  const ay = y + 38;
+  const aw = w - 52;
+  const ah = h - 78;
+
+  fill(0, 0, 0, 55);
+  rect(ax, ay, aw, ah, 14);
+
+  // Animated hint (uses frameCount; no draw() needed here)
+  const t = frameCount * 0.03;
+
+  // Player dot
+  const px = ax + aw * 0.3 + sin(t * 1.1) * 10;
+  const py = ay + ah * 0.62 + cos(t * 0.9) * 10;
+
+  fill(90, 210, 220, 60);
+  ellipse(px, py, 44, 44);
+
+  fill(90, 210, 220);
+  ellipse(px, py, 18, 18);
+
+  // Bullets
+  drawBullet(ax + aw * 0.95 - ((t * 150) % (aw + 80)), ay + ah * 0.28, 18);
+  drawBullet(ax + aw * 0.95 - ((t * 200 + 70) % (aw + 120)), ay + ah * 0.5, 14);
+  drawBullet(
+    ax + aw * 0.95 - ((t * 240 + 140) % (aw + 160)),
+    ay + ah * 0.72,
+    20,
+  );
+
+  // Story prompt + stat note
+  fill(220);
+  textAlign(LEFT, TOP);
+  textSize(16);
+  text(
+    "You woke up with a target on your back.\nEvery room is a decision.\nEvery decision changes what the bullets mean.",
+    x + 30,
+    y + 18,
+  );
+
+  fill(160);
+  textSize(14);
+  text("Tracked stat: TRUST (unlocks endings)", x + 30, y + h - 30);
+}
+
+function drawBullet(x, y, s) {
+  noStroke();
+  fill(255, 210, 140);
+  ellipse(x, y, s, s);
+
+  fill(255, 140, 90, 140);
+  rectMode(CENTER);
+  rect(x + s * 0.9, y, s * 2.2, s * 0.35, 8);
+
+  fill(255, 255, 255, 120);
+  ellipse(x - s * 0.15, y - s * 0.15, s * 0.35, s * 0.35);
 }
